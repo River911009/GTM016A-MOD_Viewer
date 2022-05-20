@@ -1,0 +1,5 @@
+address w   r   function
+0       1   1   check alive
+20      1   2   get ntc value
+38      1   1   calibration
+100     1   512 get 16-bit temperature array
