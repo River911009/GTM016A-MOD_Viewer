@@ -64,6 +64,10 @@ def TestResult():
         sg.Button(button_text='Display MinMax',size=(26,1),key='__DMIMA__')
       ],
       [
+        sg.Text(text='Interpolation:',size=(10,1)),
+        sg.Combo(values=['OFF','LINEAR_64'],default_value='LINEAR_64',size=(15,1),key='__INTERP__')
+      ],
+      [
         sg.Text(text='Disp contrast',size=(10,1)),
         sg.Combo(values=[5,10,15,20],default_value=10,size=(15,1),key='__DISP__'),
       ],
@@ -216,6 +220,11 @@ while(True):
       out=np.clip((image*a+b),0,255).astype(np.uint8)
 
       out=cv2.applyColorMap(out,cv2.COLORMAP_MAGMA)
+
+      if values['__INTERP__']=='LINEAR_64':
+        out=cv2.resize(out,(64,64),interpolation=cv2.INTER_LINEAR)
+
+      out=cv2.resize(out,param['DISPLAY_SIZE'],interpolation=cv2.INTER_NEAREST)
 
       if draw_MinMax:
         cv2.rectangle(
