@@ -24,7 +24,7 @@ param={
   'MODIFY_DATE':'24 Nov, 2021',
   'ICON_WINDOW':resource_path('tools.ico'),
   'BRANCH_LIST':['main','intel','sales'],
-  'BRANCH_SELECTED':'main',
+  'BRANCH_SELECTED':'intel',
   'DLL_ARCHITECTURE':'./HidDeviceSdk_x64.dll' if os.environ['PROCESSOR_ARCHITECTURE'].endswith('64') else './HidDeviceSdk_x86.dll',
   'FRAME_SIZE':(16,16),
   'DISPLAY_SIZE':(480,480),
