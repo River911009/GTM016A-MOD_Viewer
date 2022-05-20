@@ -23,8 +23,8 @@ param={
   'VERSION':'1.0',
   'MODIFY_DATE':'24 Nov, 2021',
   'ICON_WINDOW':resource_path('tools.ico'),
-  'OPERATE_MODE_LIST':['Demo','Config','Logger'],
-  'OPERATE_MODE':'Config',
+  'BRANCH_LIST':['main','intel','sales'],
+  'BRANCH_SELECTED':'main',
   'DLL_ARCHITECTURE':'./HidDeviceSdk_x64.dll' if os.environ['PROCESSOR_ARCHITECTURE'].endswith('64') else './HidDeviceSdk_x86.dll',
   'FRAME_SIZE':(16,16),
   'DISPLAY_SIZE':(480,480),
@@ -36,11 +36,15 @@ param={
   'DATA_TYPE_LIST':[100,200,210,220],
   'SENSOR_GAIN_LIST':[1,2,4,8],
   'SENSOR_IPIX_LIST':[5,10,15,20,25,30,35,40],
+  'AVG_SIZE':8,
 }
 
 draw_MinMax=0
 
 click_pos=[(0,0),0]
+temp_area_out=np.zeros(param['FRAME_SIZE'],dtype=np.uint16)
+temp_area_buffer=np.zeros((param['FRAME_SIZE']),dtype=np.uint32)
+temp_area_pointer=0
 reconnect_timer=0
 last_time=0
 
@@ -50,6 +54,7 @@ board_temp=2500
 # Sub func
 ########################################
 def TestResult():
+  visable=True if param['BRANCH_SELECTED']==param['BRANCH_LIST'][0] else False
   return(
     [
       [
@@ -58,7 +63,7 @@ def TestResult():
       [
         sg.Text(text='Image stream',size=(10,1)),
         sg.Button(button_text='START',size=(5,1)),
-        # sg.Button(button_text='Calibrate',size=(7,1))
+        sg.Button(button_text='Calibrate',size=(7,1),visible=visable)
       ],
       [
         sg.Button(button_text='Display MinMax',size=(26,1),key='__DMIMA__')
@@ -77,18 +82,18 @@ def TestResult():
       ],
       [
         sg.Text(text='Cursor Temp.',size=(10,1),text_color='lime'),
-        sg.Text(text='0',size=(10,1),text_color='lime',key='__CTMP__'),
-        sg.Text(text='°C',size=(2,1),text_color='lime'),
+        sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='lime',key='__CTMP__'),
+        sg.Text(text='°C',size=(2,1),font=('Helvetica','20'),text_color='lime'),
       ],
-      [
-        sg.Text(text='Min Temp.',size=(10,1),text_color='blue'),
-        sg.Text(text='0',size=(10,1),text_color='blue',key='__MINT__'),
-        sg.Text(text='°C',size=(2,1),text_color='blue'),
-      ],
+      # [
+      #   sg.Text(text='Min Temp.',size=(10,1),text_color='blue'),
+      #   sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='blue',key='__MINT__'),
+      #   sg.Text(text='°C',size=(2,1),font=('Helvetica','20'),text_color='blue'),
+      # ],
       [
         sg.Text(text='Max Temp.',size=(10,1),text_color='red'),
-        sg.Text(text='0',size=(10,1),text_color='red',key='__MAXT__'),
-        sg.Text(text='°C',size=(2,1),text_color='red'),
+        sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='red',key='__MAXT__'),
+        sg.Text(text='°C',size=(2,1),font=('Helvetica','20'),text_color='red'),
       ],
       [
         sg.Text(text='')
@@ -144,19 +149,19 @@ def event_handler(window,event):
     else:
       draw_MinMax=0
 
-  # if event=='Calibrate':
-  #   param['app_status']=param['APP_STATUS_LIST'][0]
-  #   device.I2C_write(address=10,data=200,write_length=1)
-  #   param['app_status']=param['APP_STATUS_LIST'][1]
+  if event=='Calibrate':
+    param['app_status']=param['APP_STATUS_LIST'][0]
+    device.I2C_read(address=38,write_length=1,read_length=1)
+    param['app_status']=param['APP_STATUS_LIST'][1]
 
 def draw_MinMaxPixel(frame):
   min_ind,max_ind=cv2.minMaxLoc(cv2.normalize(src=frame,dst=None,alpha=255,beta=0,norm_type=cv2.NORM_MINMAX))[-2:]
   min_temp,max_temp,pos_temp=frame[min_ind[1]][min_ind[0]],frame[max_ind[1]][max_ind[0]],frame[click_pos[0][1]][click_pos[0][0]]
 
-  window['__MINT__'].update(str(min_temp//100)+'.'+str(min_temp%100))
-  window['__MAXT__'].update(str(max_temp//100)+'.'+str(max_temp%100))
+  # window['__MINT__'].update(str(min_temp//100)+'.'+str(min_temp%100))
+  window['__MAXT__'].update(str(max_temp//100)+'.'+str(max_temp%100)[:1])
   if click_pos[1]>0:
-    window['__CTMP__'].update(str(pos_temp//100)+'.'+str(pos_temp%100))
+    window['__CTMP__'].update(str(pos_temp//100)+'.'+str(pos_temp%100)[:1])
   return(min_ind,max_ind)
 
 ########################################
@@ -212,7 +217,23 @@ while(True):
       # image[0][param['FRAME_SIZE'][1]-1]=0
 
       image=np.clip(image,2000,5000)  # range for body temperature measuring
-      min_ind,max_ind=draw_MinMaxPixel(image)
+
+      # Moving average filter using Circular Buffer
+      # temp_area_buffer[temp_area_pointer]=image
+      # temp_area_pointer=temp_area_pointer+1 if temp_area_pointer<7 else 0
+      # temp_area_out=np.average(temp_area_buffer,0).astype(np.uint16)
+
+      # Normal average filter
+      if temp_area_pointer<param['AVG_SIZE']:
+        temp_area_buffer+=image
+        temp_area_pointer+=1
+      else:
+        temp_area_out=(temp_area_buffer//param['AVG_SIZE']).astype(np.uint16)
+        temp_area_buffer=np.zeros((param['FRAME_SIZE']),dtype=np.uint32)
+        temp_area_pointer=0
+        
+
+      min_ind,max_ind=draw_MinMaxPixel(temp_area_out)
       min_lim,max_lim=(board_temp-values['__DISP__']*100,board_temp+values['__DISP__']*100)
       image=np.clip(image,min_lim,max_lim)
       a=255/(max_lim-min_lim)
@@ -227,13 +248,13 @@ while(True):
       out=cv2.resize(out,param['DISPLAY_SIZE'],interpolation=cv2.INTER_NEAREST)
 
       if draw_MinMax:
-        cv2.rectangle(
-          out,
-          (min_ind[0]*param['DISPLAY_RESIZE'][0],min_ind[1]*param['DISPLAY_RESIZE'][1]),
-          ((min_ind[0]+1)*param['DISPLAY_RESIZE'][0],(min_ind[1]+1)*param['DISPLAY_RESIZE'][1]),
-          (255,0,0),
-          thickness=5
-        )
+        # cv2.rectangle(
+        #   out,
+        #   (min_ind[0]*param['DISPLAY_RESIZE'][0],min_ind[1]*param['DISPLAY_RESIZE'][1]),
+        #   ((min_ind[0]+1)*param['DISPLAY_RESIZE'][0],(min_ind[1]+1)*param['DISPLAY_RESIZE'][1]),
+        #   (255,0,0),
+        #   thickness=5
+        # )
         cv2.rectangle(
           out,
           (max_ind[0]*param['DISPLAY_RESIZE'][0],max_ind[1]*param['DISPLAY_RESIZE'][1]),
