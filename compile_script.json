@@ -1,0 +1,109 @@
+{
+ "version": "auto-py-to-exe-configuration_v1",
+ "pyinstallerOptions": [
+  {
+   "optionDest": "noconfirm",
+   "value": true
+  },
+  {
+   "optionDest": "filenames",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/GTM016A_Viewer.py"
+  },
+  {
+   "optionDest": "onefile",
+   "value": true
+  },
+  {
+   "optionDest": "console",
+   "value": false
+  },
+  {
+   "optionDest": "icon_file",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/tools.ico"
+  },
+  {
+   "optionDest": "ascii",
+   "value": false
+  },
+  {
+   "optionDest": "clean_build",
+   "value": false
+  },
+  {
+   "optionDest": "strip",
+   "value": false
+  },
+  {
+   "optionDest": "noupx",
+   "value": false
+  },
+  {
+   "optionDest": "disable_windowed_traceback",
+   "value": false
+  },
+  {
+   "optionDest": "version_file",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/versionfile.txt"
+  },
+  {
+   "optionDest": "embed_manifest",
+   "value": true
+  },
+  {
+   "optionDest": "uac_admin",
+   "value": false
+  },
+  {
+   "optionDest": "uac_uiaccess",
+   "value": false
+  },
+  {
+   "optionDest": "win_private_assemblies",
+   "value": false
+  },
+  {
+   "optionDest": "win_no_prefer_redirects",
+   "value": false
+  },
+  {
+   "optionDest": "bootloader_ignore_signals",
+   "value": false
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/GTM016A_Viewer.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/HidDeviceSdk_x64.dll;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/HidDeviceSdk_x86.dll;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/LICENSE;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/pl23c3.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/plotter.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/tools.ico;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/GTC/Desktop/R/GTM016A-MOD_Viewer/versionfile.txt;."
+  }
+ ],
+ "nonPyinstallerOptions": {
+  "increaseRecursionLimit": true,
+  "manualArguments": ""
+ }
+}
