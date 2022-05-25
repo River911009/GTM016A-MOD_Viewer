@@ -66,7 +66,7 @@ def TestResult():
         sg.Button(button_text='Calibrate',size=(7,1),visible=visable)
       ],
       [
-        sg.Button(button_text='Display MinMax',size=(26,1),key='__DMIMA__')
+        sg.Button(button_text='Display Maximum',size=(26,1),key='__DMIMA__')
       ],
       [
         sg.Text(text='Interpolation:',size=(10,1)),
