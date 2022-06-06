@@ -34,7 +34,7 @@ VSVersionInfo(
         StringStruct(u'FileDescription', u'This app is built to demonstrate GTM016A module.'),
         StringStruct(u'FileVersion', u'1.0.1.0'),
         StringStruct(u'InternalName', u'GTM016A-MOD_Viewer'),
-        StringStruct(u'LegalCopyright', u'©GoalTop'),
+        StringStruct(u'LegalCopyright', u'©Rivière@GoalTop'),
         StringStruct(u'OriginalFilename', u'GTM016A-MOD_Viewer.exe'),
         StringStruct(u'ProductName', u'GTM016A-MOD_Viewer - SA version (NOT for release)'),
         StringStruct(u'ProductVersion', u'1.0.1.0')])

@@ -58,48 +58,48 @@ def TestResult():
   return(
     [
       [
-        sg.Input(default_text='Device connected',size=(30,1),disabled=True,justification='center',key='__SCON__')
+        sg.Input(default_text='Device connected',size=(30,1),disabled=True,justification='center',key='__SCON__',expand_x=True)
       ],
       [
         sg.Text(text='Image stream',size=(10,1)),
         sg.Button(button_text='START',size=(5,1)),
-        sg.Button(button_text='Calibrate',size=(7,1),visible=visable)
+        sg.Button(button_text='Calibrate',size=(7,1),visible=visable,expand_x=True)
       ],
       [
-        sg.Button(button_text='Display Maximum',size=(26,1),key='__DMIMA__')
+        sg.Button(button_text='Display Maximum',size=(26,1),key='__DMIMA__',expand_x=True)
       ],
       [
         sg.Text(text='Interpolation:',size=(10,1)),
-        sg.Combo(values=['OFF','LINEAR_64'],default_value='LINEAR_64',size=(15,1),key='__INTERP__')
+        sg.Combo(values=['OFF','LINEAR_64'],default_value='LINEAR_64',size=(15,1),key='__INTERP__',expand_x=True)
       ],
       [
         sg.Text(text='Disp contrast',size=(10,1)),
-        sg.Combo(values=[5,10,15,20],default_value=10,size=(15,1),key='__DISP__'),
+        sg.Combo(values=[5,10,15,20],default_value=10,size=(15,1),key='__DISP__',expand_x=True),
       ],
       [
         sg.Text(text='FPS',size=(10,1)),
-        sg.Text(text='0',size=(10,1),key='__FPS__')
+        sg.Text(text='0',size=(10,1),key='__FPS__',expand_x=True)
       ],
       [
         sg.Text(text='Cursor Temp.',size=(10,1),text_color='lime'),
-        sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='lime',key='__CTMP__'),
+        sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='lime',key='__CTMP__',expand_x=True),
         sg.Text(text='°C',size=(2,1),font=('Helvetica','20'),text_color='lime'),
       ],
       # [
       #   sg.Text(text='Min Temp.',size=(10,1),text_color='blue'),
-      #   sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='blue',key='__MINT__'),
+      #   sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='blue',key='__MINT__',expand_x=True),
       #   sg.Text(text='°C',size=(2,1),font=('Helvetica','20'),text_color='blue'),
       # ],
       [
         sg.Text(text='Max Temp.',size=(10,1),text_color='red'),
-        sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='red',key='__MAXT__'),
+        sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='red',key='__MAXT__',expand_x=True),
         sg.Text(text='°C',size=(2,1),font=('Helvetica','20'),text_color='red'),
       ],
       [
         sg.Text(text='')
       ],
       [
-        sg.Button(button_text='EXIT',size=(26,1))
+        sg.Button(button_text='EXIT',size=(26,1),expand_x=True)
       ],
     ]
   )
