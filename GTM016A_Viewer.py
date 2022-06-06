@@ -37,6 +37,7 @@ param={
   'SENSOR_GAIN_LIST':[1,2,4,8],
   'SENSOR_IPIX_LIST':[5,10,15,20,25,30,35,40],
   'AVG_SIZE':8,
+  'temperature_offset':0,
 }
 
 draw_MinMax=0
@@ -58,48 +59,49 @@ def TestResult():
   return(
     [
       [
-        sg.Input(default_text='Device connected',size=(30,1),disabled=True,justification='center',key='__SCON__')
+        sg.Input(default_text='Device connected',size=(30,1),disabled=True,justification='center',key='__SCON__',expand_x=True)
       ],
       [
         sg.Text(text='Image stream',size=(10,1)),
         sg.Button(button_text='START',size=(5,1)),
+        sg.Button(button_text='TempOffset'),  # for demonstrate when temperature needs offset, 6 Jun 2022
         sg.Button(button_text='Calibrate',size=(7,1),visible=visable)
       ],
       [
-        sg.Button(button_text='Display Maximum',size=(26,1),key='__DMIMA__')
+        sg.Button(button_text='Display Maximum',size=(26,1),key='__DMIMA__',expand_x=True)
       ],
       [
         sg.Text(text='Interpolation:',size=(10,1)),
-        sg.Combo(values=['OFF','LINEAR_64'],default_value='LINEAR_64',size=(15,1),key='__INTERP__')
+        sg.Combo(values=['OFF','LINEAR_64'],default_value='LINEAR_64',size=(15,1),key='__INTERP__',expand_x=True)
       ],
       [
         sg.Text(text='Disp contrast',size=(10,1)),
-        sg.Combo(values=[5,10,15,20],default_value=10,size=(15,1),key='__DISP__'),
+        sg.Combo(values=[5,10,15,20],default_value=10,size=(15,1),key='__DISP__',expand_x=True),
       ],
       [
         sg.Text(text='FPS',size=(10,1)),
-        sg.Text(text='0',size=(10,1),key='__FPS__')
+        sg.Text(text='0',size=(10,1),key='__FPS__',expand_x=True)
       ],
       [
         sg.Text(text='Cursor Temp.',size=(10,1),text_color='lime'),
-        sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='lime',key='__CTMP__'),
+        sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='lime',key='__CTMP__',expand_x=True),
         sg.Text(text='°C',size=(2,1),font=('Helvetica','20'),text_color='lime'),
       ],
       # [
       #   sg.Text(text='Min Temp.',size=(10,1),text_color='blue'),
-      #   sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='blue',key='__MINT__'),
+      #   sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='blue',key='__MINT__',expand_x=True),
       #   sg.Text(text='°C',size=(2,1),font=('Helvetica','20'),text_color='blue'),
       # ],
       [
         sg.Text(text='Max Temp.',size=(10,1),text_color='red'),
-        sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='red',key='__MAXT__'),
+        sg.Text(text='0',size=(4,1),font=('Helvetica','20'),text_color='red',key='__MAXT__',expand_x=True),
         sg.Text(text='°C',size=(2,1),font=('Helvetica','20'),text_color='red'),
       ],
       [
         sg.Text(text='')
       ],
       [
-        sg.Button(button_text='EXIT',size=(26,1))
+        sg.Button(button_text='EXIT',size=(26,1),expand_x=True)
       ],
     ]
   )
@@ -153,15 +155,23 @@ def event_handler(window,event):
     param['app_status']=param['APP_STATUS_LIST'][0]
     device.I2C_read(address=38,write_length=1,read_length=1)
     param['app_status']=param['APP_STATUS_LIST'][1]
+  
+  if event=='TempOffset':
+    inp=sg.popup_get_text("Input new temperature offset:\n(Previous offset value = %.2f °C)"%param['temperature_offset'],'Display temperature offset',icon=param['ICON_WINDOW'])
+    if inp:
+      try:
+        param['temperature_offset']=float(inp)
+      except:
+        sg.popup_error("Type number only!")
 
 def draw_MinMaxPixel(frame):
   min_ind,max_ind=cv2.minMaxLoc(cv2.normalize(src=frame,dst=None,alpha=255,beta=0,norm_type=cv2.NORM_MINMAX))[-2:]
   min_temp,max_temp,pos_temp=frame[min_ind[1]][min_ind[0]],frame[max_ind[1]][max_ind[0]],frame[click_pos[0][1]][click_pos[0][0]]
 
-  # window['__MINT__'].update(str(min_temp//100)+'.'+str(min_temp%100))
-  window['__MAXT__'].update(str(max_temp//100)+'.'+str(max_temp%100)[:1])
+  # window['__MINT__'].update('%.2f'%((min_temp/100)+param['temperature_offset']))
+  window['__MAXT__'].update('%.2f'%((max_temp/100)+param['temperature_offset']))
   if click_pos[1]>0:
-    window['__CTMP__'].update(str(pos_temp//100)+'.'+str(pos_temp%100)[:1])
+    window['__CTMP__'].update('%.2f'%((pos_temp/100)+param['temperature_offset']))
   return(min_ind,max_ind)
 
 ########################################
