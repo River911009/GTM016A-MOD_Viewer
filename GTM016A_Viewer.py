@@ -240,7 +240,7 @@ while(True):
       b=255-a*max_lim
       out=np.clip((image*a+b),0,255).astype(np.uint8)
 
-      out=cv2.applyColorMap(out,cv2.COLORMAP_MAGMA)
+      out=cv2.applyColorMap(out,cv2.COLORMAP_INFERNO)
 
       if values['__INTERP__']=='LINEAR_64':
         out=cv2.resize(out,(64,64),interpolation=cv2.INTER_LINEAR)
