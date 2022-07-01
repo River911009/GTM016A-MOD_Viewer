@@ -79,7 +79,7 @@ def TestResult():
       [
         sg.Text(text='Max',size=(10,1)),
         sg.Slider(
-          range=(0,param['MAXIMUM_TEMPERATURE']),
+          range=(1,param['MAXIMUM_TEMPERATURE']),
           default_value=40,
           resolution=param['RESOLUTION_TEMPERATURE'],
           orientation='horizontal',
@@ -90,7 +90,7 @@ def TestResult():
       [
         sg.Text(text='Min',size=(10,1)),
         sg.Slider(
-          range=(0,param['MAXIMUM_TEMPERATURE']),
+          range=(0,param['MAXIMUM_TEMPERATURE']-1),
           default_value=20,
           resolution=param['RESOLUTION_TEMPERATURE'],
           orientation='horizontal',
@@ -146,15 +146,7 @@ def layout_ui():
     ]
   )
 
-def event_handler(window,event,values):
-  if event=='__MAX_TEMP__':
-    if values['__MAX_TEMP__'] < values['__MIN_TEMP__']:
-      window['__MIN_TEMP__'].update(values['__MAX_TEMP__'])
-
-  if event=='__MIN_TEMP__':
-    if values['__MIN_TEMP__'] > values['__MAX_TEMP__']:
-      window['__MAX_TEMP__'].update(values['__MIN_TEMP__'])
-
+def event_handler(window,event):
   if event=='START':
     if param['app_status']==param['APP_STATUS_LIST'][0]:
       param['app_status']=param['APP_STATUS_LIST'][1]
@@ -223,7 +215,7 @@ window['__CANVAS__'].bind('<Button-1>','click')
 ########################################
 while(True):
   event,values=window.read(timeout=1)
-  event_handler(window,event,values)
+  event_handler(window,event)
 
   if device.error_count>16 or reconnect_timer>10:
     reconnect_timer=0
@@ -241,6 +233,13 @@ while(True):
   if event in (sg.WIN_CLOSED,'EXIT'):
     break
 
+  if event=='__MAX_TEMP__':
+    if values['__MAX_TEMP__'] < values['__MIN_TEMP__']:
+      window['__MIN_TEMP__'].update(values['__MAX_TEMP__']-1)
+
+  if event=='__MIN_TEMP__':
+    if values['__MIN_TEMP__'] > values['__MAX_TEMP__']:
+      window['__MAX_TEMP__'].update(values['__MIN_TEMP__']+1)
 
   if param['app_status']==param['APP_STATUS_LIST'][1]:
     ret,ntc=device.I2C_read(address=20,write_length=1,read_length=2)
