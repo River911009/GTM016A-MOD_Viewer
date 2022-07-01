@@ -234,11 +234,11 @@ while(True):
     break
 
   if event=='__MAX_TEMP__':
-    if values['__MAX_TEMP__'] < values['__MIN_TEMP__']:
+    if values['__MAX_TEMP__'] <= values['__MIN_TEMP__']:
       window['__MIN_TEMP__'].update(values['__MAX_TEMP__']-1)
 
   if event=='__MIN_TEMP__':
-    if values['__MIN_TEMP__'] > values['__MAX_TEMP__']:
+    if values['__MIN_TEMP__'] >= values['__MAX_TEMP__']:
       window['__MAX_TEMP__'].update(values['__MIN_TEMP__']+1)
 
   if param['app_status']==param['APP_STATUS_LIST'][1]:
@@ -278,10 +278,12 @@ while(True):
       min_ind,max_ind=draw_MinMaxPixel(temp_area_out)
       # min_lim,max_lim=(board_temp-values['__DISP__']*100,board_temp+values['__DISP__']*100)
       min_lim,max_lim=(values['__MIN_TEMP__']*100,values['__MAX_TEMP__']*100)
-      image=np.clip(image,min_lim,max_lim)
-      a=255/(max_lim-min_lim)
-      b=255-a*max_lim
-      out=np.clip((image*a+b),0,255).astype(np.uint8)
+
+      if min_lim<max_lim:
+        image=np.clip(image,min_lim,max_lim)
+        a=255/(max_lim-min_lim)
+        b=255-a*max_lim
+        out=np.clip((image*a+b),0,255).astype(np.uint8)
 
       out=cv2.applyColorMap(out,cv2.COLORMAP_INFERNO)
 
