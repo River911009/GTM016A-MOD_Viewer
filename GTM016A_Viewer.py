@@ -38,6 +38,8 @@ param={
   'SENSOR_IPIX_LIST':[5,10,15,20,25,30,35,40],
   'AVG_SIZE':8,
   'temperature_offset':0,
+  'MAXIMUM_TEMPERATURE':100,
+  'RESOLUTION_TEMPERATURE':1,
 }
 
 draw_MinMax=0
@@ -75,9 +77,31 @@ def TestResult():
         sg.Combo(values=['OFF','LINEAR_64'],default_value='LINEAR_64',size=(15,1),key='__INTERP__',expand_x=True)
       ],
       [
-        sg.Text(text='Disp contrast',size=(10,1)),
-        sg.Combo(values=[5,10,15,20],default_value=10,size=(15,1),key='__DISP__',expand_x=True),
+        sg.Text(text='Max',size=(10,1)),
+        sg.Slider(
+          range=(0,param['MAXIMUM_TEMPERATURE']),
+          default_value=40,
+          resolution=param['RESOLUTION_TEMPERATURE'],
+          orientation='horizontal',
+          enable_events=True,
+          key='__MAX_TEMP__'
+        ),
       ],
+      [
+        sg.Text(text='Min',size=(10,1)),
+        sg.Slider(
+          range=(0,param['MAXIMUM_TEMPERATURE']),
+          default_value=20,
+          resolution=param['RESOLUTION_TEMPERATURE'],
+          orientation='horizontal',
+          enable_events=True,
+          key='__MIN_TEMP__'
+        ),
+      ],
+      # [
+      #   sg.Text(text='Disp contrast',size=(10,1)),
+      #   sg.Combo(values=[5,10,15,20],default_value=10,size=(15,1),key='__DISP__',expand_x=True),
+      # ],
       [
         sg.Text(text='FPS',size=(10,1)),
         sg.Text(text='0',size=(10,1),key='__FPS__',expand_x=True)
@@ -122,7 +146,15 @@ def layout_ui():
     ]
   )
 
-def event_handler(window,event):
+def event_handler(window,event,values):
+  if event=='__MAX_TEMP__':
+    if values['__MAX_TEMP__'] < values['__MIN_TEMP__']:
+      window['__MIN_TEMP__'].update(values['__MAX_TEMP__'])
+
+  if event=='__MIN_TEMP__':
+    if values['__MIN_TEMP__'] > values['__MAX_TEMP__']:
+      window['__MAX_TEMP__'].update(values['__MIN_TEMP__'])
+
   if event=='START':
     if param['app_status']==param['APP_STATUS_LIST'][0]:
       param['app_status']=param['APP_STATUS_LIST'][1]
@@ -191,7 +223,7 @@ window['__CANVAS__'].bind('<Button-1>','click')
 ########################################
 while(True):
   event,values=window.read(timeout=1)
-  event_handler(window,event)
+  event_handler(window,event,values)
 
   if device.error_count>16 or reconnect_timer>10:
     reconnect_timer=0
@@ -218,15 +250,16 @@ while(True):
     # ret,frame='OK',np.random.randint(255,size=512)
     ret,frame=device.I2C_read(address=100,write_length=1,read_length=512)
 
-    if ret=='OK':
+    if ret=='OK' and event=='__TIMEOUT__':
       out=np.zeros(shape=param['FRAME_SIZE'],dtype=np.uint8)
       
       image=np.reshape(np.frombuffer(bytes(frame),dtype=np.dtype(np.uint16).newbyteorder('>')),newshape=param['FRAME_SIZE']).copy()
+      # image=np.reshape(np.random.randint(low=0,high=3000,size=256,dtype=np.uint16),(16,16))
 
       # locate top right corner
       # image[0][param['FRAME_SIZE'][1]-1]=0
 
-      image=np.clip(image,2000,5000)  # range for body temperature measuring
+      image=np.clip(image,values['__MIN_TEMP__']*100,values['__MAX_TEMP__']*100).astype(np.uint32)  # range for body temperature measuring
 
       # Moving average filter using Circular Buffer
       # temp_area_buffer[temp_area_pointer]=image
@@ -244,13 +277,14 @@ while(True):
         
 
       min_ind,max_ind=draw_MinMaxPixel(temp_area_out)
-      min_lim,max_lim=(board_temp-values['__DISP__']*100,board_temp+values['__DISP__']*100)
+      # min_lim,max_lim=(board_temp-values['__DISP__']*100,board_temp+values['__DISP__']*100)
+      min_lim,max_lim=(values['__MIN_TEMP__']*100,values['__MAX_TEMP__']*100)
       image=np.clip(image,min_lim,max_lim)
       a=255/(max_lim-min_lim)
       b=255-a*max_lim
       out=np.clip((image*a+b),0,255).astype(np.uint8)
 
-      out=cv2.applyColorMap(out,cv2.COLORMAP_MAGMA)
+      out=cv2.applyColorMap(out,cv2.COLORMAP_INFERNO)
 
       if values['__INTERP__']=='LINEAR_64':
         out=cv2.resize(out,(64,64),interpolation=cv2.INTER_LINEAR)
