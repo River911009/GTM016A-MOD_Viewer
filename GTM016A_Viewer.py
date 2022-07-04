@@ -53,8 +53,6 @@ reconnect_timer=0
 last_time=0
 
 board_temp=2500
-max_temp=4000
-min_temp=2000
 
 ########################################
 # Sub func
