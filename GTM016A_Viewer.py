@@ -1,5 +1,6 @@
 from asyncore import write
 import PySimpleGUI as sg
+from cv2 import exp
 import numpy as np
 import sys,os
 import cv2
@@ -83,7 +84,6 @@ def TestResult():
           default_value=40,
           resolution=param['RESOLUTION_TEMPERATURE'],
           orientation='horizontal',
-          enable_events=True,
           key='__MAX_TEMP__'
         ),
       ],
@@ -94,7 +94,6 @@ def TestResult():
           default_value=20,
           resolution=param['RESOLUTION_TEMPERATURE'],
           orientation='horizontal',
-          enable_events=True,
           key='__MIN_TEMP__'
         ),
       ],
@@ -105,6 +104,10 @@ def TestResult():
       [
         sg.Text(text='FPS',size=(10,1)),
         sg.Text(text='0',size=(10,1),key='__FPS__',expand_x=True)
+      ],
+      [
+        sg.Text(text='STD',size=(10,1)),
+        sg.Text(text='0',size=(10,1),key='__STD__',expand_x=True)
       ],
       [
         sg.Text(text='Cursor Temp.',size=(10,1),text_color='lime'),
@@ -225,13 +228,11 @@ while(True):
   if event in (sg.WIN_CLOSED,'EXIT'):
     break
 
-  if event=='__MAX_TEMP__':
-    if values['__MAX_TEMP__'] <= values['__MIN_TEMP__']:
-      window['__MIN_TEMP__'].update(values['__MAX_TEMP__']-1)
+  if values['__MAX_TEMP__'] <= values['__MIN_TEMP__']:
+    window['__MIN_TEMP__'].update(values['__MAX_TEMP__']-1)
 
-  if event=='__MIN_TEMP__':
-    if values['__MIN_TEMP__'] >= values['__MAX_TEMP__']:
-      window['__MAX_TEMP__'].update(values['__MIN_TEMP__']+1)
+  if values['__MIN_TEMP__'] >= values['__MAX_TEMP__']:
+    window['__MAX_TEMP__'].update(values['__MIN_TEMP__']+1)
 
   if param['app_status']==param['APP_STATUS_LIST'][1] and values['__SCON__']=='Device connected':
     ret,ntc=device.I2C_read(address=20,write_length=1,read_length=2)
@@ -257,14 +258,14 @@ while(True):
       # temp_area_out=np.average(temp_area_buffer,0).astype(np.uint16)
 
       # Normal average filter
-      if temp_area_pointer<param['AVG_SIZE']:
+      if temp_area_pointer<(param['AVG_SIZE']-1):
         temp_area_buffer+=image
         temp_area_pointer+=1
       else:
         temp_area_out=(temp_area_buffer//param['AVG_SIZE']).astype(np.uint16)
+        window['__STD__'].update('%.2f'%(np.std(temp_area_out,ddof=0)))
         temp_area_buffer=np.zeros((param['FRAME_SIZE']),dtype=np.uint32)
         temp_area_pointer=0
-        
 
       min_ind,max_ind=draw_MinMaxPixel(temp_area_out)
       # min_lim,max_lim=(board_temp-values['__DISP__']*100,board_temp+values['__DISP__']*100)
