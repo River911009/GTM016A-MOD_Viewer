@@ -214,10 +214,10 @@ window['__CANVAS__'].bind('<Button-1>','click')
 # Main loop
 ########################################
 while(True):
-  event,values=window.read(timeout=1)
+  event,values=window.read(timeout=10)
   event_handler(window,event)
 
-  if device.error_count>16 or reconnect_timer>10:
+  if device.error_count>16 or reconnect_timer>20:
     reconnect_timer=0
     device.close_communication()
     device=Pl23c3(param['DLL_ARCHITECTURE'])
@@ -241,7 +241,7 @@ while(True):
     if values['__MIN_TEMP__'] >= values['__MAX_TEMP__']:
       window['__MAX_TEMP__'].update(values['__MIN_TEMP__']+1)
 
-  if param['app_status']==param['APP_STATUS_LIST'][1]:
+  if param['app_status']==param['APP_STATUS_LIST'][1] and values['__SCON__']=='Device connected':
     ret,ntc=device.I2C_read(address=20,write_length=1,read_length=2)
     if ret=='OK':
       board_temp=int.from_bytes(ntc,byteorder='big',signed=True)
