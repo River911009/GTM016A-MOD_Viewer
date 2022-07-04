@@ -31,11 +31,11 @@ VSVersionInfo(
       StringTable(
         u'040904B0',
         [StringStruct(u'CompanyName', u'GoalTop'),
-        StringStruct(u'FileDescription', u'GTM016A-MOD Viewer.'),
+        StringStruct(u'FileDescription', u'GTM016A-MOD Viewer'),
         StringStruct(u'FileVersion', u'1.0.3.1'),
         StringStruct(u'InternalName', u'GTM016A-MOD_Viewer'),
         StringStruct(u'LegalCopyright', u'©Rivière@GoalTop'),
-        StringStruct(u'OriginalFilename', u'GTM016A_Viewer(Sales rep version).exe'),
+        StringStruct(u'OriginalFilename', u'GTM016A_Viewer.exe'),
         StringStruct(u'ProductName', u'GTM016A-MOD_Viewer - Sales rep version'),
         StringStruct(u'ProductVersion', u'1.0.3.1')])
       ]), 
