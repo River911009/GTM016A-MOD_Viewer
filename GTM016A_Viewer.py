@@ -266,11 +266,11 @@ while(True):
       # temp_area_out=np.average(temp_area_buffer,0).astype(np.uint16)
 
       # Normal average filter
-      if temp_area_pointer<param['AVG_SIZE']:
+      if temp_area_pointer<(param['AVG_SIZE']-1):
         temp_area_buffer+=image
         temp_area_pointer+=1
       else:
-        temp_area_out=(temp_area_buffer//param['AVG_SIZE']).astype(np.uint16)
+        temp_area_out=(temp_area_buffer//(param['AVG_SIZE']-1)).astype(np.uint16)
         temp_area_buffer=np.zeros((param['FRAME_SIZE']),dtype=np.uint32)
         temp_area_pointer=0
         
