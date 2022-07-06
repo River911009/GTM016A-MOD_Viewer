@@ -262,7 +262,7 @@ while(True):
         temp_area_buffer+=image
         temp_area_pointer+=1
       else:
-        temp_area_out=(temp_area_buffer//param['AVG_SIZE']).astype(np.uint16)
+        temp_area_out=(temp_area_buffer//(param['AVG_SIZE']-1)).astype(np.uint16)
         window['__STD__'].update('%.2f'%(np.std(temp_area_out,ddof=0)))
         temp_area_buffer=np.zeros((param['FRAME_SIZE']),dtype=np.uint32)
         temp_area_pointer=0
