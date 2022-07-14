@@ -212,14 +212,17 @@ while(True):
   event,values=window.read(timeout=10)
   event_handler(window,event)
 
-  if device.error_count>16 or reconnect_timer>20:
+  if device.error_count>16 or reconnect_timer>100:
     reconnect_timer=0
     device.close_communication()
     device=Pl23c3(param['DLL_ARCHITECTURE'])
     device.open_communication(48)
     ret,id=device.I2C_read(address=0,write_length=1,read_length=1)
     if ret=='OK':
-      window['__SCON__'].update('Device connected',text_color='green')
+      if id[0]==17:
+        window['__SCON__'].update('Device connected',text_color='green')
+      else:
+        window['__SCON__'].update('Device disconnect',text_color='red')
     else:
       window['__SCON__'].update('Device disconnect',text_color='red')
   else:
