@@ -50,6 +50,7 @@ temp_area_buffer=np.zeros((param['FRAME_SIZE']),dtype=np.uint32)
 temp_area_pointer=0
 reconnect_timer=0
 last_time=0
+fps_counter=0
 
 board_temp=2500
 
@@ -206,7 +207,7 @@ window=sg.Window(title=param['WINDOW_TITLE'],layout=layout_ui(),icon=param['ICON
 p=Plot_cv(window['__CANVAS__'],param['DISPLAY_SIZE'])
 
 device=Pl23c3(param['DLL_ARCHITECTURE'])
-device.open_communication()
+device.open_communication(48,400)
 
 window['__CANVAS__'].bind('<Button-1>','click')
 
@@ -217,14 +218,17 @@ while(True):
   event,values=window.read(timeout=10)
   event_handler(window,event)
 
-  if device.error_count>16 or reconnect_timer>20:
+  if device.error_count>16 or reconnect_timer>100:
     reconnect_timer=0
     device.close_communication()
     device=Pl23c3(param['DLL_ARCHITECTURE'])
-    device.open_communication(48)
+    device.open_communication(48,400)
     ret,id=device.I2C_read(address=0,write_length=1,read_length=1)
     if ret=='OK':
-      window['__SCON__'].update('Device connected',text_color='green')
+      if id[0]==17:
+        window['__SCON__'].update('Device connected',text_color='green')
+      else:
+        window['__SCON__'].update('Device disconnect',text_color='red')
     else:
       window['__SCON__'].update('Device disconnect',text_color='red')
   else:
@@ -233,23 +237,21 @@ while(True):
   if event in (sg.WIN_CLOSED,'EXIT'):
     break
 
-  if event=='__MAX_TEMP__':
-    if values['__MAX_TEMP__'] <= values['__MIN_TEMP__']:
-      window['__MIN_TEMP__'].update(values['__MAX_TEMP__']-1)
+  if values['__MAX_TEMP__'] <= values['__MIN_TEMP__']:
+    window['__MIN_TEMP__'].update(values['__MAX_TEMP__']-1)
 
-  if event=='__MIN_TEMP__':
-    if values['__MIN_TEMP__'] >= values['__MAX_TEMP__']:
-      window['__MAX_TEMP__'].update(values['__MIN_TEMP__']+1)
+  if values['__MIN_TEMP__'] >= values['__MAX_TEMP__']:
+    window['__MAX_TEMP__'].update(values['__MIN_TEMP__']+1)
 
   if param['app_status']==param['APP_STATUS_LIST'][1] and values['__SCON__']=='Device connected':
-    ret,ntc=device.I2C_read(address=20,write_length=1,read_length=2)
-    if ret=='OK':
-      board_temp=int.from_bytes(ntc,byteorder='big',signed=True)
+    # ret,ntc=device.I2C_read(address=20,write_length=1,read_length=2)
+    # if ret=='OK':
+    #   board_temp=int.from_bytes(ntc,byteorder='big',signed=True)
 
     # ret,frame='OK',np.random.randint(255,size=512)
     ret,frame=device.I2C_read(address=100,write_length=1,read_length=512)
 
-    if ret=='OK' and event=='__TIMEOUT__':
+    if ret=='OK' and (event=='__TIMEOUT__'):
       out=np.zeros(shape=param['FRAME_SIZE'],dtype=np.uint8)
       
       image=np.reshape(np.frombuffer(bytes(frame),dtype=np.dtype(np.uint16).newbyteorder('>')),newshape=param['FRAME_SIZE']).copy()
@@ -318,8 +320,12 @@ while(True):
 
       p.canvas_redraw(out)
 
-      window['__FPS__'].update('%05.2f'%(1/(time.time()-last_time)))
-      last_time=time.time()
+      fps_counter+=1
+      if (time.time()-last_time)>=1:
+        last_time=time.time()
+        # window['__FPS__'].update('%05.2f'%(1/(time.time()-last_time)))
+        window['__FPS__'].update('%02d'%(fps_counter))#1/(time.time()-last_time)))
+        fps_counter=0  
 
 
 ########################################
