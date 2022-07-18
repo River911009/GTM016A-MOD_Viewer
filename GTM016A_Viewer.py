@@ -52,6 +52,7 @@ temp_area_buffer=np.zeros((param['FRAME_SIZE']),dtype=np.uint32)
 temp_area_pointer=0
 reconnect_timer=0
 last_time=0
+fps_counter=0
 
 board_temp=2500
 
@@ -179,9 +180,10 @@ def event_handler(window,event):
       draw_MinMax=0
 
   if event=='Calibrate':
-    param['app_status']=param['APP_STATUS_LIST'][0]
-    device.I2C_read(address=38,write_length=1,read_length=1)
-    param['app_status']=param['APP_STATUS_LIST'][1]
+    # param['app_status']=param['APP_STATUS_LIST'][0]
+    # device.I2C_read(address=38,write_length=1,read_length=1)
+    device.I2C_read(address=20,write_length=1,read_length=2)
+    # param['app_status']=param['APP_STATUS_LIST'][1]
 
 def draw_MinMaxPixel(frame):
   min_ind,max_ind=cv2.minMaxLoc(cv2.normalize(src=frame,dst=None,alpha=255,beta=0,norm_type=cv2.NORM_MINMAX))[-2:]
@@ -216,7 +218,7 @@ while(True):
     reconnect_timer=0
     device.close_communication()
     device=Pl23c3(param['DLL_ARCHITECTURE'])
-    device.open_communication(48)
+    device.open_communication(48,400)
     ret,id=device.I2C_read(address=0,write_length=1,read_length=1)
     if ret=='OK':
       if id[0]==17:
@@ -238,14 +240,14 @@ while(True):
     window['__MAX_TEMP__'].update(values['__MIN_TEMP__']+1)
 
   if param['app_status']==param['APP_STATUS_LIST'][1] and values['__SCON__']=='Device connected':
-    ret,ntc=device.I2C_read(address=20,write_length=1,read_length=2)
-    if ret=='OK':
-      board_temp=int.from_bytes(ntc,byteorder='big',signed=True)
+    # ret,ntc=device.I2C_read(address=20,write_length=1,read_length=2)
+    # if ret=='OK':
+    #   board_temp=int.from_bytes(ntc,byteorder='big',signed=True)
 
     # ret,frame='OK',np.random.randint(255,size=512)
     ret,frame=device.I2C_read(address=100,write_length=1,read_length=512)
 
-    if ret=='OK' and event=='__TIMEOUT__':
+    if ret=='OK' and (event=='__TIMEOUT__' or event=='START'):
       out=np.zeros(shape=param['FRAME_SIZE'],dtype=np.uint8)
       
       image=np.reshape(np.frombuffer(bytes(frame),dtype=np.dtype(np.uint16).newbyteorder('>')),newshape=param['FRAME_SIZE']).copy()
@@ -312,9 +314,15 @@ while(True):
 
       p.canvas_redraw(out)
 
-      window['__FPS__'].update('%05.2f'%(1/(time.time()-last_time)))
-      last_time=time.time()
+      fps_counter+=1
+      if (time.time()-last_time)>=1:
+        last_time=time.time()
+        # window['__FPS__'].update('%05.2f'%(1/(time.time()-last_time)))
+        window['__FPS__'].update('%02d'%(fps_counter))#1/(time.time()-last_time)))
+        fps_counter=0      
 
+      # param['app_status']=param['APP_STATUS_LIST'][0]
+      # window['START'].update('START')
 
 ########################################
 # Memery recycle
