@@ -208,7 +208,7 @@ window['__CANVAS__'].bind('<Button-1>','click')
 # Main loop
 ########################################
 while(True):
-  event,values=window.read(timeout=10)
+  event,values=window.read(timeout=2)
   event_handler(window,event)
 
   if device.error_count>16 or reconnect_timer>100:
