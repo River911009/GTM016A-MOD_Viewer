@@ -27,8 +27,8 @@ param={
   'BRANCH_SELECTED':'sales',
   'DLL_ARCHITECTURE':'./HidDeviceSdk_x64.dll' if os.environ['PROCESSOR_ARCHITECTURE'].endswith('64') else './HidDeviceSdk_x86.dll',
   'FRAME_SIZE':(16,16),
-  'DISPLAY_SIZE':(480,480),
-  'DISPLAY_RESIZE':(30,30),
+  'DISPLAY_SIZE':(320,320),
+  'DISPLAY_RESIZE':(20,20),
   'APP_STATUS_LIST':['stop','start'],
   'app_status':'stop',
   'DISP_STATUS_LIST':['off','on'],
@@ -215,10 +215,10 @@ window['__CANVAS__'].bind('<Button-1>','click')
 # Main loop
 ########################################
 while(True):
-  event,values=window.read(timeout=10)
+  event,values=window.read(timeout=1)
   event_handler(window,event)
 
-  if device.error_count>16 or reconnect_timer>100:
+  if device.error_count>16 or reconnect_timer>1000:
     reconnect_timer=0
     device.close_communication()
     device=Pl23c3(param['DLL_ARCHITECTURE'])
@@ -300,14 +300,14 @@ while(True):
         #   (min_ind[0]*param['DISPLAY_RESIZE'][0],min_ind[1]*param['DISPLAY_RESIZE'][1]),
         #   ((min_ind[0]+1)*param['DISPLAY_RESIZE'][0],(min_ind[1]+1)*param['DISPLAY_RESIZE'][1]),
         #   (255,0,0),
-        #   thickness=5
+        #   thickness=1
         # )
         cv2.rectangle(
           out,
           (max_ind[0]*param['DISPLAY_RESIZE'][0],max_ind[1]*param['DISPLAY_RESIZE'][1]),
           ((max_ind[0]+1)*param['DISPLAY_RESIZE'][0],(max_ind[1]+1)*param['DISPLAY_RESIZE'][1]),
           (0,0,255),
-          thickness=5
+          thickness=2
         )
       if click_pos[1]>0:
         cv2.rectangle(
@@ -315,7 +315,7 @@ while(True):
           (click_pos[0][0]*param['DISPLAY_RESIZE'][0],click_pos[0][1]*param['DISPLAY_RESIZE'][1]),
           ((click_pos[0][0]+1)*param['DISPLAY_RESIZE'][0],(click_pos[0][1]+1)*param['DISPLAY_RESIZE'][1]),
           (0,255,0),
-          thickness=5
+          thickness=2
         )
 
       p.canvas_redraw(out)
@@ -325,7 +325,7 @@ while(True):
         last_time=time.time()
         # window['__FPS__'].update('%05.2f'%(1/(time.time()-last_time)))
         window['__FPS__'].update('%02d'%(fps_counter))#1/(time.time()-last_time)))
-        fps_counter=0  
+        fps_counter=0
 
 
 ########################################
