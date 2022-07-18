@@ -1,11 +1,8 @@
-from asyncore import write
 import PySimpleGUI as sg
-from cv2 import exp
 import numpy as np
 import sys,os
 import cv2
 import time
-from time import sleep
 from plotter import *
 from pl23c3 import Pl23c3
 
